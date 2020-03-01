@@ -218,19 +218,13 @@ module MakeSafeInterval (Endpoint : ORDERED_TYPE) : INTERVAL =
     (* intersect intvl1 intvl2 -- Returns the intersection of `intvl1`
        and `intvl2` *)
     let intersect (intvl1 : interval) (intvl2 : interval) : interval =
-      match intvl1 with
-      | Interval (low1, high1) -> (match intvl2 with
-        | Interval (low2, high2) -> 
-          if contains intvl1 high2 
-            then (if contains intvl1 low2 
-              then intvl2
-              else Interval(low1, high2))
-          else (if contains intvl1 low2
-            then Interval (low2, high1)
-            else (if contains intvl2 low1 then intvl1
-              else Empty))
-        | Empty -> Empty)
-      | Empty -> Empty
+      let ordered x y = if Endpoint.compare x y <= 0 then x, y else y, x in
+        match intvl1, intvl2 with
+        | Empty, _
+        | _, Empty -> Empty
+        | Interval (low1, high1), Interval (low2, high2) ->
+          let (_, low), (high, _) = ordered low1 low2, ordered high1 high2 in
+          create low high
   end ;;
 
 (* We have successfully made our returned module abstract, but believe
@@ -323,19 +317,13 @@ module MakeBestInterval (Endpoint: ORDERED_TYPE)
     (* intersect intvl1 intvl2 -- Returns the intersection of `intvl1`
        and `intvl2` *)
     let intersect (intvl1 : interval) (intvl2 : interval) : interval =
-      match intvl1 with
-      | Interval (low1, high1) -> (match intvl2 with
-        | Interval (low2, high2) -> 
-          if contains intvl1 high2 
-            then (if contains intvl1 low2 
-              then intvl2
-              else Interval(low1, high2))
-          else (if contains intvl1 low2
-            then Interval (low2, high1)
-            else (if contains intvl2 low1 then intvl1
-              else Empty))
-        | Empty -> Empty)
-      | Empty -> Empty
+      let ordered x y = if Endpoint.compare x y <= 0 then x, y else y, x in
+        match intvl1, intvl2 with
+        | Empty, _
+        | _, Empty -> Empty
+        | Interval (low1, high1), Interval (low2, high2) ->
+          let (_, low), (high, _) = ordered low1 low2, ordered high1 high2 in
+          create low high
   end ;;
 
 (* We now have a fully functioning functor that can create interval
